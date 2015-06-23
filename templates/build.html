@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block content %}
+<p>
+	Keep it secret; keep it safe. We can only show you this URL once.
+</p>
+<form>
+	<div>
+		<input readonly type="text" value="{{ url_for('fetch', h=hash, _external=True) }}" />
+	</div>
+</form>
+<style>
+input[type=text] {
+	width: 100%;
+}
+</style>
+<script src="{{ url_for('static', filename='build.js') }}"></script>
+{% endblock %}

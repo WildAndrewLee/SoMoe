@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% block content %}
+{{ EXTRAS|safe }}
+<p>
+	Phantom provides completely anonymous file uploading and downloading.
+</p>
+<hr />
+{% if MIN_FREE_DISK < FREE_SPACE %}
+<form action="upload" method="POST" enctype="multipart/form-data">
+	<div>
+		<input id="picker" type="file" name="upload" required />
+	</div>
+	<div>
+		<button id="upload" type="submit">
+			Upload File
+		</button>
+		<span class="progress">
+			<span></span>
+		</span>
+	</div>
+</form>
+<aside id="anchor">
+	<div>
+		<span>Drop File</span>
+		<i class="fa fa-anchor fa-3x"></i>
+	</div>
+</aside>
+<script src="{{ url_for('static', filename='upload.js') }}"></script>
+{% else %}
+<p>
+	Uploads are currently disabled due to a lack of free diskspace. Email <a href="mailto:{{ CONTACT }}">{{ CONTACT }}</a> if you want to get this resolved faster.
+</p>
+{% endif %}
+{% endblock %}
