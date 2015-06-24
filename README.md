@@ -11,5 +11,3 @@ Needs the usual Flask stuff like SQLAlchemy. Make sure be smart about security.
 - HTML
 - CSS
 - JavaScript
-
-Note that if you run Phantom using uWSGI then you must put ```extras.html``` in whatever directory you put your uWSGI ini script (if you use one).
