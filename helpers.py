@@ -2,6 +2,7 @@ import time
 from flask import request, session
 
 from config import config
+from upload import Upload
 
 '''
 Helper Functions
@@ -29,3 +30,20 @@ def write_log(message):
 			log.write(name + ip + ' - ' + now + ' ' + message + '\n')
 
 	return None
+
+'''
+Used when fetching and serving files.
+Updates the last access and returns the sys path.
+'''
+def get_path(h):
+	try:
+		path = Upload.query.filter(Upload.h == h).one()
+	except:
+		abort(404)
+
+	path.last_updated = time.time()
+	path.save()
+
+	path = path.path
+
+	return path

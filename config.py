@@ -1,6 +1,6 @@
 config = {
 	'UPLOAD_FOLDER': '/var/phantom/uploads',
-	'MAX_PAYLOAD': 20,
+	'MAX_PAYLOAD': 15,
 	'UPLOAD_WAIT': 10,
 	'PORT': 9001,
 	'IO_DELAY': 0.025,

@@ -14,6 +14,14 @@
  * Also Moe.create is used to create new DOM elements.
  * Also also, Moe does returns a Moe object not a NodeList
  * like jQuery. kthnxbye.
+ *
+ * Note that if you provide Moe with a CSS selector then
+ * _ele will be a NodeList. You must use Moe.pick before
+ * doing anything else because, as written above, Moe
+ * is inteded to work with single DOM elements only. Luckily
+ * or may unluckily, Moe.pick takes a function to use as
+ * a filter. This means that you can call Moe.pick several
+ * times to create a composite filter.
  */
 
 (function(window, undefined){
@@ -24,7 +32,7 @@
 		if(ele instanceof HTMLElement)
 			this._ele = ele;
 		else
-			this._ele = document.querySelector(ele);
+			this._ele = document.querySelectorAll(ele);
 	};
 
 	Object.defineProperty(Moe.prototype, 'success', {
@@ -36,6 +44,18 @@
 	Moe.extend = function(obj_a, obj_b){
 		for(key in obj_b.prototype)
 			obj_a.prototype[key] = obj_b.prototype[key];
+	};
+
+	Moe.format = function(fmt){
+		var args = arguments;
+		var index = 0;
+
+		return fmt.replace(/{(\d+)?}/g, function(i, val){
+			if(val === undefined)
+				return args[++index];
+
+			return args[val] !== undefined ? args[val] : val;
+		});
 	};
 
 	Moe.create = function(ele){
@@ -135,7 +155,7 @@
 
 	Moe.prototype.hasParent = function(ele){
 		if(ele instanceof Moe)
-			ele = ele.ele();
+			ele = ele._ele;
 
 		// We don't want this to be a parent of
 		// itself.
@@ -145,6 +165,19 @@
 			child = child.parentElement;
 
 		return child === ele;
+	};
+
+	Moe.prototype.pick = function(criteria){
+		var ele = this._ele;
+
+		if(ele instanceof NodeList || ele instanceof Array){
+			if(typeof criteria === 'number')
+				this._ele = ele[criteria];
+			else if(typeof criteria === 'function')
+				this._ele = Array.prototype.call(Moe(ele), criteria);
+		}
+
+		return this;
 	};
 
 	Moe.prototype.ele = function(){
