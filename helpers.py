@@ -1,5 +1,6 @@
 import time
 from flask import request, session
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from config import config
 from upload import Upload
@@ -38,7 +39,7 @@ Updates the last access and returns the sys path.
 def get_path(h):
 	try:
 		path = Upload.query.filter(Upload.h == h).one()
-	except:
+	except NoResultFound, MultipleResultsFound:
 		abort(404)
 
 	path.last_updated = time.time()
