@@ -60,9 +60,7 @@ def delete_url(h):
 	return redirect(url_for('index'))
 
 @app.route('/build-url', methods=['GET'])
-def build_url():
-	return render_template('build.html', title='Access URL', hash='blah')
-	
+def build_url():	
 	if 'filename' not in session or not session['filename']:
 		return redirect(url_for('index'))
 
