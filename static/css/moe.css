@@ -1,0 +1,274 @@
+* {
+	outline: none;
+}
+
+html, body {
+	font-family: Helvetica, Arial;
+	font-size: 14px;
+	line-height: 20px;
+	background: #fff;
+	height: 100%;
+}
+
+body {
+	transform: translateY(-6px);
+}
+
+.expanded {
+	transform: translateY(0);
+	animation-name: slide;
+	animation-duration: 0.3s;
+}
+
+@keyframes slide {
+	from {
+		transform: translateY(-6px);
+	}
+
+	to {
+		transform: translateY(0px);
+	}
+}
+
+hr {
+	background: url(border.png) top center repeat-x;
+	height: 4px;
+	border: none;
+}
+
+h1, h2, h3, h4 {
+	font-weight: 400;
+}
+
+a {
+	color: #4ECDC4;
+	text-decoration: none !important;
+}
+
+a:hover {
+	border-bottom: 1px solid #4ECDC4;
+}
+
+#top, #progress, #uploads {
+	background: #556270;
+}
+
+#top div {
+	max-width: 720px;
+	margin: 0px auto;
+	display: flex;
+	justify-content: space-between;
+}
+
+#top header, #top nav {
+	display: inline-block;
+}
+
+#top header h2 {
+	font-size: 24px;
+	font-weight: 300;
+	color: #fff;
+	letter-spacing: 2px;
+	margin: 0px;
+}
+
+#top header h2 a {
+	font-family: 'Open Sans Condensed';
+}
+
+#top a {
+	padding: 14px 20px 0px;
+	color: #fff !important;
+	border: none !important;
+	height: 54px;
+	display: inline-block;
+	box-sizing: border-box;
+	transition: 0.15s background;
+	font-family: 'Open Sans', Helvetica, Arial;
+}
+
+#top a:hover {
+	background: #3e3e3e;
+}
+
+#main {
+	margin: 0px auto;
+	max-width: 720px;
+}
+
+form div {
+	margin: 15px 0px 20px;
+}
+
+form div label {
+	width: 80px;
+	display: inline-block;
+	text-align: right;
+	margin-right: 10px;
+}
+
+input, select, .alert, button {
+	border-radius: 4px;
+}
+
+input[type=text], select {
+	padding: 8px 13px;
+	width: 220px;
+	border: 1px solid #ccc;
+	box-sizing: content-box;
+}
+
+input[type=submit], button {
+	background: #FF6B6B;
+	color: #fff;
+	padding: 12px 12px 15px;
+	border: 1px solid #FF6B6B;
+	font-family: 'Open Sans';
+}
+
+input[type=submit]:hover, button:hover {
+	background: #FF4A4A;
+	border: 1px solid #FF4A4A;
+}
+
+.alert {
+	color: #31708f;
+	background: #d9edf7;
+	border: 1px solid #C7E6F5;
+	padding: 8px 16px 10px;
+	margin: 1em 0px 0px;
+	font-size: 12px;
+}
+
+.alert a {
+	color: #fff;
+	border-bottom: 1px solid #fff !important;
+}
+
+.green {
+	border: 1px solid #d6e9c6;
+	background: #dff0d8;
+	color: #3c763d;
+}
+
+.yellow {
+	color: #8a6d3b;
+	background: #fcf8e3;
+	border: 1px solid #faebcc;
+}
+
+.red {
+	color: #a94442;
+	background: #f2dede;
+	border: 1px solid #ebccd1;
+}	
+
+.alert ul, .alert li {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+.progress {
+	display: inline-block;
+	border: 1px solid #fff;
+	box-shadow: 0px 0px 0px 1px #2c2c2c;
+	color: transparent;
+	overflow: hidden;
+	vertical-align: middle;
+	border-radius: 4px;
+	height: 6px;
+	width: 100px;
+	position: relative;
+	display: none;
+	margin-left: 24px;
+}
+
+.progress span {
+	border-radius: 4px;
+	background: #2c2c2c;
+	width: 0%;
+	height: 100%;
+	display: block;
+	transition: 0.3s width;
+}
+
+#progress span {
+	width: 0%;
+	height: 6px;
+	background: #C7F464;
+	display: block;
+	transition: 0.3s width;
+}
+
+#picker {
+	display: none;
+}
+
+.fa {
+	-webkit-perspective: 1000;
+	transform: rotateZ(0);
+	-webkit-font-smoothing: antialiased;
+}
+
+.divide {
+	padding: 0px;
+	margin: 0px;
+}
+
+.divide li {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.divide li + li {
+	border-top: 1px solid #d5d5d5;
+	padding-top: 12px;
+	margin-top: 12px;
+}
+
+#anchor {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: -6px;
+	background: rgba(99, 152, 230, 0.95);
+	color: #fff;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	display: none;
+	opacity: 0;
+}
+
+#anchor div {
+	transform: translateY(-48px);
+	top: 10px;
+}
+
+#anchor span {
+	display: block;
+	font-family: 'Open Sans Condensed';
+	font-size: 32px;
+	line-height: 48px;
+	margin-bottom: 24px;
+}
+
+#anchor.hovered {
+	display: flex;
+	animation-name: fade;
+	animation-duration: 0.2s;
+	opacity: 100;
+}
+
+@keyframes fade {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 100;
+	}
+}

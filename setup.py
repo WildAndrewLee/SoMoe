@@ -44,11 +44,13 @@ def variables():
 	NAME = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
 	HEADER = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
 	TITLE = None
+	STYLE = 'moe.css' if host == 'somoe.moe' else 'phantom.css'
 
 	if request.endpoint == 'index':
 		TITLE = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
 
 	return {
+		'STYLE': STYLE,
 		'NAME': NAME,
 		'TITLE': TITLE,
 		'HEADER': HEADER,
