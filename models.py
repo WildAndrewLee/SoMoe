@@ -1,5 +1,4 @@
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -11,7 +10,7 @@ Database Connection via SQLAlchemy
 '''
 eng = 'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
 engine = create_engine(
-	'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
+	eng
 )
 
 Session = sessionmaker(bind=engine)
