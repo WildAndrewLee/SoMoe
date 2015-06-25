@@ -29,10 +29,15 @@
 		if(this === window)
 			return new Moe(ele);
 
-		if(ele instanceof HTMLElement)
+		if(ele instanceof HTMLElement){
 			this._ele = ele;
-		else
+		}
+		else{
 			this._ele = document.querySelectorAll(ele);
+
+			if(this._ele.length === 1)
+				this._ele = this._ele[0];
+		}
 	};
 
 	Object.defineProperty(Moe.prototype, 'success', {

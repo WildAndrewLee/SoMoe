@@ -1,15 +1,16 @@
-from models import db
+from sqlalchemy import Column, Integer, String, DateTime
+from models import Model, session
 
 '''
 Uploads Database Model
 '''
-class Upload(db.Model):
+class Upload(Model):
 	__tablename__ = 'uploads'
-	id = db.Column(db.Integer, primary_key = True)
-	h = db.Column(db.String(255))
-	ip = db.Column(db.String(255))
-	path = db.Column(db.String(255))
-	last_update = db.Column(db.DateTime())
+	id = Column(Integer, primary_key = True)
+	h = Column(String(255))
+	ip = Column(String(255))
+	path = Column(String(255))
+	last_update = Column(DateTime())
 
 	def __init__(self, h, ip, path, last_update):
 		self.h = h
@@ -18,9 +19,9 @@ class Upload(db.Model):
 		self.last_update = last_update
 
 	def save(self):
-		db.session.merge(self)
-		db.session.commit()
+		with session() as sess:
+			sess.merge(self)
 
 	def delete(self):
-		db.session.delete(self)
-		db.session.commit()
+		with session() as sess:
+			sess.delete(self)

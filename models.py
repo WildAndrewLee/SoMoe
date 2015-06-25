@@ -1,10 +1,31 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 from secrets import db
 
 '''
 Database Connection via SQLAlchemy
 '''
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
-db = SQLAlchemy(app)
+eng = 'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
+engine = create_engine(
+	'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
+)
+
+Session = sessionmaker(bind=engine)
+Model = declarative_base()
+
+@contextmanager
+def session():
+	s = Session()
+
+	try:
+		yield s
+		s.commit()
+	except:
+		s.rollback()
+		raise
+	finally:
+		s.close()

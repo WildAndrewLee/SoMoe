@@ -41,15 +41,15 @@ def variables():
 				.replace('www.', '')\
 				.split('/')[0]
 
-	NAME = 'So Moe' if host == 'somoe.moe' else 'Phantom'
-	HEADER = 'Moe' if host == 'somoe.moe' else 'Phantom'
+	NAME = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
+	HEADER = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
 	TITLE = None
 
-	if not request.endpoint == 'index':
-		TITLE = 'So Moe' if host == 'somoe.moe' else 'Phantom'
+	if request.endpoint == 'index':
+		TITLE = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
 
 	return {
-		'NAME': NAME
+		'NAME': NAME,
 		'TITLE': TITLE,
 		'HEADER': HEADER,
 		'MAX_PAYLOAD': MAX_PAYLOAD,
