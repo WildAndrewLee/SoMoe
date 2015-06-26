@@ -2,6 +2,9 @@
 <html>
 	<head>
 		<title>{{ TITLE or title }}</title>
+		<script>
+		var MAX_PAYLOAD = {{ MAX_PAYLOAD }};
+		</script>
 		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Open+Sans" />
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}" />
@@ -10,45 +13,44 @@
 		<script src="{{ url_for('static', filename='js/firefly.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/neko.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/seishin.js') }}"></script>
-		<script>
-		var MAX_PAYLOAD = {{ MAX_PAYLOAD }};
-		</script>
 	</head>
 	<body>
-		<div id="progress">
-			<span></span>
-		</div>
-		<section id="top">
-			<div>
-				<header>
-					<h2><a href="{{ url_for('index') }}">{{ HEADER }}</a></h2>
-				</header>
-				<nav>
-					<a href="https://github.com/WildAndrewLee/Phantom">Github</a>
-					<a href="{{ url_for('guidelines') }}">Guidelines</a>
-				</nav>
+		<div id="wrapper">
+			<div id="progress">
+				<span></span>
 			</div>
-		</section>
-		<section id="main">
-			{% with messages = get_flashed_messages() %}
-				{% if messages %}
-					<aside class="alert">
+			<section id="top">
+				<div>
+					<header>
+						<h2><a href="{{ url_for('index') }}">{{ HEADER }}</a></h2>
+					</header>
+					<nav>
+						<a href="https://github.com/WildAndrewLee/Phantom">Github</a>
+						<a href="{{ url_for('guidelines') }}">Guidelines</a>
+					</nav>
+				</div>
+			</section>
+			<section id="main">
+				{% with messages = get_flashed_messages() %}
+					{% if messages %}
+						<aside class="alert">
+							<ul>
+								{% for message in messages %}
+									<li>{{ message|safe }}</li>
+								{% endfor %}
+							</ul>
+						</aside>
+					{% endif %}
+				{% endwith %}
+				<noscript>
+					<aside class="alert yellow">
 						<ul>
-							{% for message in messages %}
-								<li>{{ message|safe }}</li>
-							{% endfor %}
+							<li>JavaScript must be enabled to use this site.</li>
 						</ul>
 					</aside>
-				{% endif %}
-			{% endwith %}
-			<noscript>
-				<aside class="alert yellow">
-					<ul>
-						<li>JavaScript must be enabled to use this site.</li>
-					</ul>
-				</aside>
-			</noscript>
-			{% block content %}{% endblock %}
-		</section>
+				</noscript>
+				{% block content %}{% endblock %}
+			</section>
+		</div>
 	</body>
 </html>

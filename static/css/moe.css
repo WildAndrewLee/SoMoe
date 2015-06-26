@@ -11,7 +11,16 @@ html, body {
 }
 
 body {
+	background-color: #fff;
+	background-image: url("/grill");
+	background-repeat: no-repeat;
+	background-size: 160px 160px;
+	background-position: calc(100% - 50px) 100%;
+}
+
+#wrapper {
 	transform: translateY(-6px);
+	height: 100%;
 }
 
 .expanded {
@@ -22,11 +31,11 @@ body {
 
 @keyframes slide {
 	from {
-		transform: translateY(-6px);
+		transform: translateY(-6px) !important;
 	}
 
 	to {
-		transform: translateY(0px);
+		transform: translateY(0px) !important;
 	}
 }
 
@@ -85,6 +94,7 @@ a:hover {
 	box-sizing: border-box;
 	transition: 0.15s background;
 	font-family: 'Open Sans', Helvetica, Arial;
+	transform: translateZ(0);
 }
 
 #top a:hover {
@@ -234,7 +244,7 @@ input[type=submit]:hover, button:hover {
 	left: 0px;
 	right: 0px;
 	bottom: -6px;
-	background: rgba(99, 152, 230, 0.95);
+	background: rgba(78, 205, 196, 0.95);
 	color: #fff;
 	align-items: center;
 	justify-content: center;
@@ -261,14 +271,17 @@ input[type=submit]:hover, button:hover {
 	animation-name: fade;
 	animation-duration: 0.2s;
 	opacity: 100;
+	transform: translateZ(0)
 }
 
 @keyframes fade {
 	from {
 		opacity: 0;
+		transform: translateZ(0);
 	}
 
 	to {
 		opacity: 100;
+		transform: translateZ(0);
 	}
 }

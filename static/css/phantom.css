@@ -10,6 +10,11 @@ body {
 	transform: translateY(-6px);
 }
 
+#wrapper {
+	transform: translateY(-6px);
+	height: 100%;
+}
+
 .expanded {
 	transform: translateY(0);
 	animation-name: slide;
@@ -18,11 +23,11 @@ body {
 
 @keyframes slide {
 	from {
-		transform: translateY(-6px);
+		transform: translateY(-6px) !important;
 	}
 
 	to {
-		transform: translateY(0px);
+		transform: translateY(0px) !important;
 	}
 }
 
@@ -81,6 +86,7 @@ a:hover {
 	box-sizing: border-box;
 	transition: 0.1s background;
 	font-family: 'Open Sans', Helvetica, Arial;
+	transform: translateZ(0);
 }
 
 #top a:hover {
@@ -256,14 +262,17 @@ input[type=submit]:hover, button:hover {
 	animation-name: fade;
 	animation-duration: 0.2s;
 	opacity: 100;
+	transform: translateZ(0)
 }
 
 @keyframes fade {
 	from {
 		opacity: 0;
+		transform: translateZ(0);
 	}
 
 	to {
 		opacity: 100;
+		transform: translateZ(0);
 	}
 }

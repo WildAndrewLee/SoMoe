@@ -12,7 +12,7 @@
 	var on_load = function(e){
 		e = JSON.parse(e);
 
-		Moe('body').removeClass('expanded');
+		Moe('#wrapper').removeClass('expanded');
 
 		setTimeout(function(){
 			Moe(bar).css('width', '0%');
@@ -43,7 +43,7 @@
 		file.on('load', on_load);
 		file.on('progress', update_progress);
 
-		Moe('body').addClass('expanded');
+		Moe('#wrapper').addClass('expanded');
 
 		setTimeout(function(){
 			file.upload('upload', {
@@ -72,7 +72,7 @@
 	document.body.addEventListener('dragenter', function(e){
 		Moe('#anchor').addClass('hovered');
 		
-		if(e.target !== document.body)
+		if(e.target !== Moe('#wrapper').ele())
 			anchor_count++;
 	});
 

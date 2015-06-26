@@ -1,4 +1,4 @@
-import os, time, hashlib, shutil, datetime
+import os, time, hashlib, shutil, datetime, random
 from flask import Flask, request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify
 from werkzeug import secure_filename
 
@@ -16,6 +16,15 @@ from upload import Upload
 '''
 Endpoints
 '''
+@app.route('/grill', methods=['GET'])
+def grill():
+	grill_dir = os.path.join(os.path.dirname(__file__), 'static/grill')
+	grills = os.listdir(grill_dir)
+	rand = int(random.random() * len(grills))
+
+	return send_from_directory(grill_dir, grills[rand])
+
+
 @app.route('/login', methods=['GET'])
 @requires_auth
 def login():
