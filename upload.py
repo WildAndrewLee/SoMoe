@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from models import Model, session
+from models import Model, session_factory
 
 '''
 Uploads Database Model
@@ -12,16 +12,10 @@ class Upload(Model):
 	path = Column(String(255))
 	last_update = Column(DateTime())
 
-	def __init__(self, h, ip, path, last_update):
-		self.h = h
-		self.ip = ip
-		self.path = path
-		self.last_update = last_update
-
 	def save(self):
-		with session() as sess:
+		with session_factory() as sess:
 			sess.merge(self)
 
 	def delete(self):
-		with session() as sess:
+		with session_factory() as sess:
 			sess.delete(self)

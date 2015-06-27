@@ -1,15 +1,28 @@
 from flask import request
+from flask.ext.login import current_user
 
 from config import config
 
 conf = globals()
 conf.update(config)
 
-from main import app
+from main import app, login_manager
 
 from disk_usage import disk_usage
 from helpers import is_logged_in, write_log
 from secrets import secrets
+
+from user import User
+
+login_manager.refresh_view = 'login'
+
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(userid):
+	return User.getById(int(userid))
+
+from config import config
 
 '''
 Runtime Config
@@ -18,7 +31,7 @@ Runtime Config
 app.debug = DEBUG
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = MAX_PAYLOAD * 1024 * 1024
+#app.config['MAX_CONTENT_LENGTH'] = MAX_PAYLOAD * 1024 * 1024
 app.secret_key = secrets['key']
 
 # Commented out to allow somoe.moe and phantom.reticent.io to
@@ -46,6 +59,11 @@ def variables():
 	TITLE = None
 	STYLE = 'moe.css' if host == 'somoe.moe' else 'phantom.css'
 
+	if current_user.is_authenticated():
+		max_payload = current_user.max_payload()
+	else:
+		max_payload = MAX_PAYLOAD
+
 	if request.endpoint == 'index':
 		TITLE = 'SoMoe' if host == 'somoe.moe' else 'Phantom'
 
@@ -54,7 +72,7 @@ def variables():
 		'NAME': NAME,
 		'TITLE': TITLE,
 		'HEADER': HEADER,
-		'MAX_PAYLOAD': MAX_PAYLOAD,
+		'MAX_PAYLOAD': max_payload,
 		'UPLOAD_WAIT': UPLOAD_WAIT,
 		'CONTACT': 'phantom@reticent.io',
 		'MIN_FREE_DISK': MIN_FREE_DISK,

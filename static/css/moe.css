@@ -23,19 +23,19 @@ body {
 	height: 100%;
 }
 
-.expanded {
-	transform: translateY(0);
+#wrapper.expanded {
+	transform: translateY(0) !important;
 	animation-name: slide;
 	animation-duration: 0.3s;
 }
 
 @keyframes slide {
 	from {
-		transform: translateY(-6px) !important;
+		transform: translateY(-6px);
 	}
 
 	to {
-		transform: translateY(0px) !important;
+		transform: translateY(0px);
 	}
 }
 
@@ -111,7 +111,7 @@ form div {
 }
 
 form div label {
-	width: 80px;
+	width: 120px;
 	display: inline-block;
 	text-align: right;
 	margin-right: 10px;
@@ -121,7 +121,7 @@ input, select, .alert, button {
 	border-radius: 4px;
 }
 
-input[type=text], select {
+input[type=text], input[type=password], select {
 	padding: 8px 13px;
 	width: 220px;
 	border: 1px solid #ccc;
@@ -200,7 +200,12 @@ input[type=submit]:hover, button:hover {
 	width: 0%;
 	height: 100%;
 	display: block;
-	transition: 0.3s width;
+	transition: 0.2s width;
+	transform: translateZ(0)
+}
+
+#progress {
+	transform: translateZ(0)
 }
 
 #progress span {
@@ -208,7 +213,8 @@ input[type=submit]:hover, button:hover {
 	height: 6px;
 	background: #C7F464;
 	display: block;
-	transition: 0.3s width;
+	transition: 0.2s width;
+	transform: translateZ(0)
 }
 
 #picker {

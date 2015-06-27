@@ -1,7 +1,7 @@
 from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from contextlib import contextmanager
 from secrets import db
 
@@ -13,11 +13,12 @@ engine = create_engine(
 	eng
 )
 
-Session = sessionmaker(bind=engine)
+factory = sessionmaker(bind=engine)
+Session = scoped_session(factory)
 Model = declarative_base()
 
 @contextmanager
-def session():
+def session_factory():
 	s = Session()
 
 	try:

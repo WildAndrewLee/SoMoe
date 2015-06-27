@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h3>Register</h3>
+<hr />
+{% from '_formhelpers.html' import render_form %}
+{{ render_form(form) }}
+{% endblock %}

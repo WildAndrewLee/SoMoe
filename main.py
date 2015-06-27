@@ -1,11 +1,8 @@
 from flask import Flask
-
-from config import config
-
-conf = globals()
-conf.update(config)
+from flask.ext.login import LoginManager
 
 app = Flask(__name__)
+login_manager = LoginManager()
 
 import setup
 from routes import *

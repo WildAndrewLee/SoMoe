@@ -6,28 +6,24 @@ html, body {
 	height: 100%;
 }
 
-body {
-	transform: translateY(-6px);
-}
-
 #wrapper {
 	transform: translateY(-6px);
 	height: 100%;
 }
 
-.expanded {
-	transform: translateY(0);
+#wrapper.expanded {
+	transform: translateY(0) !important;
 	animation-name: slide;
 	animation-duration: 0.3s;
 }
 
 @keyframes slide {
 	from {
-		transform: translateY(-6px) !important;
+		transform: translateY(-6px);
 	}
 
 	to {
-		transform: translateY(0px) !important;
+		transform: translateY(0px);
 	}
 }
 
@@ -103,7 +99,7 @@ form div {
 }
 
 form div label {
-	width: 80px;
+	width: 120px;
 	display: inline-block;
 	text-align: right;
 	margin-right: 10px;
@@ -113,7 +109,7 @@ input, select, .alert, button {
 	border-radius: 4px;
 }
 
-input[type=text], select {
+input[type=text], input[type=password], select {
 	padding: 8px 13px;
 	width: 220px;
 	border: 1px solid #ccc;

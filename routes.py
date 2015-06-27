@@ -1,8 +1,10 @@
-import os, time, hashlib, shutil, datetime, random
-from flask import Flask, request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify
+import os, time, hashlib, shutil, datetime, random, sys, traceback
+from flask import Flask, request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify, escape
+from flask.ext.login import fresh_login_required, login_user, logout_user, current_user
 from werkzeug import secure_filename
 
-from main import app
+from main import app, login_manager
+import setup
 
 from config import config
 
@@ -10,12 +12,21 @@ conf = globals()
 conf.update(config)
 
 from helpers import write_log, get_path
-from auth import requires_auth
+from models import session_factory
+from login import Login
+from register import Register
+from user import requires_role, User
 from upload import Upload
+from invite import Invite
 
 '''
 Endpoints
 '''
+
+@login_manager.unauthorized_handler
+def not_found():
+	abort(404)
+
 @app.route('/grill', methods=['GET'])
 def grill():
 	grill_dir = os.path.join(os.path.dirname(__file__), 'static/grill')
@@ -24,11 +35,85 @@ def grill():
 
 	return send_from_directory(grill_dir, grills[rand])
 
-
-@app.route('/login', methods=['GET'])
-@requires_auth
-def login():
+@app.route('/logout', methods=['GET'])
+def logout():
+	logout_user()
+	flash('You have been logged out.')
 	return redirect(url_for('index'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	if current_user.is_authenticated():
+		return redirect(url_for('index'))
+
+	login = Login(request.form)
+
+	if request.method == 'POST':
+		user = login.validate()
+	 
+		# Role 0 is admin so don't check
+	 	if user:
+			flash('You are now logged in as ' + user.username + '.')
+
+			login_user(user)
+
+			return redirect(url_for('index'))
+
+	return render_template('login.html', title='Log In', form=login)
+
+@app.route('/invite/<name>', methods=['GET'])
+@fresh_login_required
+@requires_role(0)
+def invite_new(name):
+	with session_factory() as sess:
+		try:
+			user = sess.query(User).filter(User.username == name).one()
+			return 'User already exists.'
+		except:
+			pass
+
+		try:
+			h = hashlib.md5(name + str(time.time())).hexdigest()
+			Invite(name=name, h=h).save()
+		except:
+			return 'Invite already exists.'
+
+	return url_for('invite', name=name, h=h, _external=True)
+
+@app.route('/invite/<name>/<h>', methods=['GET', 'POST'])
+def invite(name, h):
+	if current_user.is_authenticated():
+		return redirect(url_for('index'))
+
+	if not Invite.confirm_invite(name, h):
+		flash('Oops. Looks like somebody gave you a bad invite.', category='red')
+		return redirect(url_for('index'))
+
+	register = Register(request.form)
+	register._action = request.path
+
+	if request.method == 'POST' and register.validate():
+		user = User(
+			username=name,
+			h=register.password.data,
+			max_load=AUTH_PAYLOAD
+		)
+
+		user.save()
+
+		with session_factory() as sess:
+			sess.query(Invite).filter(
+				Invite.name == name,
+				Invite.h == h
+			).delete()
+
+		flash('You are now registered.')
+
+		return redirect(url_for('login'))
+
+	return render_template('register.html', title='You\'re Invited', form=register)
+
+
 
 # This endpoint is not made public due to all of the
 # fucking things that could possibly happen.
@@ -46,27 +131,27 @@ def fetch(h):
 	return send_from_directory(app.config['UPLOAD_FOLDER'], path, as_attachment=True)
 
 @app.route('/delete/<h>', methods=['GET'])
-@requires_auth
+@fresh_login_required
+@requires_role(0)
 def delete_url(h):
-	if 'admin' not in session or not session['admin']:
-		abort(404)
+	with session_factory() as sess:
+		try:
+			path = sess.query(Upload).filter(Upload.h == h).one()
+		except:
+			abort(404)
 
-	try:
-		path = Upload.query.filter(Upload.h == h).one()
-	except:
-		abort(404)
+		sys_path = os.path.join(app.config['UPLOAD_FOLDER'], path.path)
 
-	sys_path = os.path.join(app.config['UPLOAD_FOLDER'], path.path)
+		shutil.rmtree(os.path.dirname(sys_path))
+		path.delete()
 
-	shutil.rmtree(os.path.dirname(sys_path))
-	path.delete()
+		msg = 'Deleted hash <{0}>.'.format(h)
+		msg = escape(msg)
 
-	msg = 'Deleted hash <{0}>.'.format(h)
+		flash(msg)
+		write_log('Removed file with hash ' + h)
 
-	flash(msg)
-	write_log('Removed file with hash ' + h)
-
-	return redirect(url_for('index'))
+		return redirect(url_for('index'))
 
 @app.route('/build-url', methods=['GET'])
 def build_url():	
@@ -85,7 +170,7 @@ def build_url():
 	h = hashlib.md5(filename).hexdigest()
 	h += hashlib.md5(str(now)).hexdigest()
 
-	Upload(h, ip, filename, now).save()
+	Upload(h=h, ip=ip, path=filename, last_update=now).save()
 
 	return render_template('build.html', title='Access URL', hash=h)
 
@@ -97,10 +182,38 @@ def oops(err):
 	if err not in MESSAGES:
 		abort(404)
 
-	return render_template('oops.html', title=MESSAGES[err], message=MESSAGES[err])
+	flash(MESSAGES[err], category='red')
+
+	return redirect(url_for('index'))
+
+	#return render_template('oops.html', title=MESSAGES[err], message=MESSAGES[err])
 
 @app.route('/upload', methods=['POST'])
 def upload():
+	content_length = request.content_length
+
+	if not content_length:
+		abort(500)
+
+	if current_user.is_authenticated():
+		max_payload = current_user.max_payload()
+	else:
+		max_payload = MAX_PAYLOAD
+
+	max_payload *= 1024 ** 2
+
+	if content_length > max_payload:
+		if 'ajax' in request.form:
+			return jsonify({
+				'mode': 'message',
+				'message': MESSAGES['too-big'],
+				'color': 'red'
+			})
+		else:
+			redirect(url_for('oops', err='too-big'))
+
+	print 'not over max'
+
 	now = time.time()
 
 	if 'last' in session and now - session['last'] < UPLOAD_WAIT:

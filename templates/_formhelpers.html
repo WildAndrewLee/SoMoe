@@ -1,0 +1,32 @@
+{% macro render_form(form) %}
+<form method="{{ form._method }}" action="{{ form._action }}">
+	{{ render_errors(form) }}
+
+	{% for field in form %}
+		{{ render_field(field) }}
+	{% endfor %}
+	<input type="submit" value="{{ form.submit_text }}">
+</form>
+{% endmacro %}
+
+{% macro render_errors(form) %}
+	{% if form.errors|count %}
+		<aside class="alert red">
+			<ul>
+				{% for field in form %}
+					{% for error in field.errors %}
+						<li>{{ error|safe }}</li>
+					{% endfor %}
+				{% endfor %}
+			</ul>
+		</aside>
+	{% endif %}
+{% endmacro %}
+
+{% macro render_field(field) %}
+<div>
+	<label>{{ field.label }}</label>
+	<span>{{ field(**kwargs)|safe }}
+	</span>
+</div>
+{% endmacro %}

@@ -3,7 +3,7 @@ from flask import request, session
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from config import config
-from models import session
+from models import session_factory
 from upload import Upload
 
 '''
@@ -38,15 +38,16 @@ Used when fetching and serving files.
 Updates the last access and returns the sys path.
 '''
 def get_path(h):
-	with session() as sess:
+	with session_factory() as sess:
 		try:
 			path = sess.query(Upload).filter(Upload.h == h).one()
 		except NoResultFound, MultipleResultsFound:
 			abort(404)
 
 		path.last_updated = time.time()
+
+		real_path = path.path
+
 		path.save()
 
-		path = path.path
-
-		return path
+		return real_path
