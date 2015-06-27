@@ -41,7 +41,9 @@ def get_path(h):
 	with session_factory() as sess:
 		try:
 			path = sess.query(Upload).filter(Upload.h == h).one()
-		except NoResultFound, MultipleResultsFound:
+		except NoResultFound:
+			abort(404)
+		except MultipleResultsFound:
 			abort(404)
 
 		path.last_updated = time.time()

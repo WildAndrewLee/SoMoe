@@ -1,6 +1,5 @@
-import sys
 from functools import wraps
-from flask import abort, session
+from flask import abort
 from sqlalchemy import Column, Integer, String
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import current_user

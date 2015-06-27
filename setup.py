@@ -22,8 +22,6 @@ login_manager.init_app(app)
 def load_user(userid):
 	return User.getById(int(userid))
 
-from config import config
-
 '''
 Runtime Config
 '''

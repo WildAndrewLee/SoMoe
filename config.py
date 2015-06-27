@@ -1,5 +1,3 @@
-from flask.ext.login import current_user
-
 config = {
 	'UPLOAD_FOLDER': '/var/phantom/uploads',
 	'MAX_PAYLOAD': 20,

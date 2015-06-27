@@ -1,10 +1,9 @@
-import os, time, hashlib, shutil, datetime, random, sys, traceback
-from flask import Flask, request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify, escape
+import os, time, hashlib, shutil, datetime, random
+from flask import request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify, escape
 from flask.ext.login import fresh_login_required, login_user, logout_user, current_user
 from werkzeug import secure_filename
 
 from main import app, login_manager
-import setup
 
 from config import config
 
@@ -211,8 +210,6 @@ def upload():
 			})
 		else:
 			redirect(url_for('oops', err='too-big'))
-
-	print 'not over max'
 
 	now = time.time()
 

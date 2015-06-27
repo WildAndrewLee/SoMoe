@@ -1,4 +1,4 @@
-from wtforms import Form, TextField, PasswordField, validators
+from wtforms import Form, PasswordField, validators
 
 '''
 Form for registering.
