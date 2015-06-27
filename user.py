@@ -1,9 +1,9 @@
 from functools import wraps
 from flask import abort
 from sqlalchemy import Column, Integer, String
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import current_user
 
+from main import bcrypt
 from models import Model, session_factory
 from config import config
 
@@ -31,7 +31,7 @@ class User(Model):
 	is_auth = None
 
 	def __init__(self, **kwargs):
-		kwargs['h'] = generate_password_hash(kwargs['h'])
+		kwargs['h'] = bcrypt.generate_password_hash(kwargs['h'])
 		super(User, self).__init__(**kwargs)
 
 	# Cache results of auth check because
@@ -56,7 +56,13 @@ class User(Model):
 				return False
 
 	def max_payload(self):
-		return self.max_load or config['MAX_PAYLOAD']
+		if self.max_load:
+			if self.max_load > config['AUTH_PAYLOAD']:
+				return self.max_load
+			else:
+				return config['AUTH_PAYLOAD']
+		else:
+			return config['MAX_PAYLOAD']
 
 	# Users are always active.
 	def is_active(self):
@@ -76,7 +82,7 @@ class User(Model):
 					User.username == username
 				).one()
 
-				if check_password_hash(user.h, password):
+				if bcrypt.check_password_hash(user.h, password):
 					sess.expunge(user)
 					return user
 
