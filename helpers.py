@@ -1,5 +1,5 @@
-import time
-from flask import request, session
+import time, datetime
+from flask import request, session, abort
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from config import config
@@ -46,10 +46,8 @@ def get_path(h):
 		except MultipleResultsFound:
 			abort(404)
 
-		path.last_updated = time.time()
-
+		path.last_update = datetime.datetime.utcnow()
 		real_path = path.path
-
-		path.save()
+		path.save()		
 
 		return real_path
