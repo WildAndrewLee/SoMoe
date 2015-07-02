@@ -9,7 +9,7 @@ Database Connection via SQLAlchemy
 '''
 eng = 'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
 engine = create_engine(
-	eng
+	eng, pool_recycle=1800
 )
 
 factory = sessionmaker(bind=engine)
