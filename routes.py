@@ -1,4 +1,4 @@
-import os, time, hashlib, shutil, datetime, random
+import os, time, hashlib, shutil, datetime, random, subprocess
 from flask import request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify, escape
 from flask.ext.login import fresh_login_required, login_user, logout_user, current_user
 from werkzeug import secure_filename
@@ -238,6 +238,10 @@ def upload():
 	file = request.files['upload']
 
 	filename = secure_filename(file.filename)
+
+	if not filename:
+		filename = hashlib.md5(time.time()).hexdigest()
+
 	hashed_name = hashlib.md5(filename).hexdigest()
 	hashed_time = hashlib.md5(str(now)).hexdigest()
 
@@ -252,6 +256,27 @@ def upload():
 	path = os.path.join(directory, filename)
 	
 	file.save(path)
+
+	# Strip meta-data if we can.
+	subprocess.call(['exiftool', '-quiet', '-all=', path])
+
+	# Scan for virus
+	try:
+		true_path = os.path.join(app.config['UPLOAD_FOLDER'], path)
+
+		command = 'clamdscan {true_path} | clamdscan --remove -'.format(**locals())
+
+		print command
+
+		# true_path is sanitized already.
+		subprocess.check_call(command, shell=True)
+	except subprocess.CalledProcessError:
+		return jsonify({
+			'mode': 'message',
+			'message': MESSAGES['virus'],
+			'color': 'red'
+		})
+
 	write_log('Uploaded ' + path)
 
 	session['filename'] = path

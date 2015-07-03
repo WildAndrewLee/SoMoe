@@ -17,7 +17,8 @@ messages = {
 	'MESSAGES': {
 		'empty': 'You must choose a file to upload.',
 		'slow-down': 'You must wait {} seconds before uploading another file.'.format(config['UPLOAD_WAIT']),
-		'too-big': 'The file you are trying to upload is too big.'
+		'too-big': 'The file you are trying to upload is too big.',
+		'virus': 'Your upload could not be completed because it was detected to be a virus.'
 	}
 }
 
