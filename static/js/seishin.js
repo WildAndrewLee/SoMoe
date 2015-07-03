@@ -12,7 +12,7 @@ var show_message = function(msg, color){
 			.html(message);
 	}
 	else{
-		Moe('#main').prepend(
+		Moe('main').prepend(
 			Moe.create('aside')
 				.attr('id', 'message')
 				.addClass('alert')

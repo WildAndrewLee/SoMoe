@@ -258,15 +258,14 @@ def upload():
 	file.save(path)
 
 	# Strip meta-data if we can.
-	subprocess.call(['exiftool', '-quiet', '-all=', path])
+	exiftool = '/usr/bin/exiftool'
+	command = '{exiftool} -q -all= {path}'.format(**locals())
+	subprocess.call(command, shell=True)
 
 	# Scan for virus
 	try:
-		true_path = os.path.join(app.config['UPLOAD_FOLDER'], path)
-
-		command = 'clamdscan {true_path} | clamdscan --remove -'.format(**locals())
-
-		print command
+		clamdscan = '/usr/bin/clamdscan'
+		command = '{clamdscan} {path} | {clamdscan} --remove -'.format(**locals())
 
 		# true_path is sanitized already.
 		subprocess.check_call(command, shell=True)
