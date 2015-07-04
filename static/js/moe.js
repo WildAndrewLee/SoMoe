@@ -103,7 +103,9 @@
 			return this._ele.innerHTML;
 
 		if(html instanceof Moe)
-			this.html('').append(html);
+			return this.html('').append(html);
+
+		this._ele.innerHTML = html;
 
 		return this;
 	};
