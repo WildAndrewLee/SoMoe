@@ -19,7 +19,7 @@
  * _ele will be a NodeList. You must use Moe.pick before
  * doing anything else because, as written above, Moe
  * is inteded to work with single DOM elements only. Luckily
- * or may unluckily, Moe.pick takes a function to use as
+ * or maybe unluckily, Moe.pick takes a function to use as
  * a filter. This means that you can call Moe.pick several
  * times to create a composite filter.
  */
@@ -42,7 +42,7 @@
 
 	Object.defineProperty(Moe.prototype, 'success', {
 		get: function(){
-			return this._ele instanceof HTMLElement;
+			return this._ele instanceof HTMLElement || this._ele instanceof NodeList;
 		}
 	});
 
@@ -181,7 +181,7 @@
 			if(typeof criteria === 'number')
 				this._ele = ele[criteria];
 			else if(typeof criteria === 'function')
-				this._ele = Array.prototype.call(Moe(ele), criteria);
+				this._ele = Array.prototype.filter.call(this._ele, criteria);
 		}
 
 		return this;
