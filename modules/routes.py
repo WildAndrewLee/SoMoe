@@ -43,7 +43,7 @@ def login():
 		user = User.get_by_name(login.name.data)
 
 		if not user or not bcrypt.check_password_hash(user.h, login.password.data):
-			flash('Invalid username or password specified.')
+			login.name.errors.append('Invalid username or password specified.')
 			return render_template('login.html', title='Log In', form=login)
 		
 
