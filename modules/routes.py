@@ -119,7 +119,7 @@ def process_file(file):
 	file.save(path)
 
 	# Strip meta-data if we can.
-	subprocess.call(config.script.EXIF_TOOL.format(**locals()))
+	subprocess.call(config.script.EXIF_TOOL.format(**locals()), shell=True)
 
 	# Scan for virus
 	try:
