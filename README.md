@@ -1,4 +1,4 @@
-# Phantom
+# SoMoe
 An anonymous (if you want it to be) file hosting service.
 
 Needs the usual Flask stuff like SQLAlchemy. Make sure be smart about security.

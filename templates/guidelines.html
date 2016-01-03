@@ -1,4 +1,7 @@
 {% extends 'layout.html' %}
+
+{%block title %}Guidelines{% endblock %}
+
 {% block content %}
 <article>
 	<header>
@@ -17,7 +20,7 @@
 			<li>In the event that a wipe occurs to free up space, the least recently used files are deleted first.</li>
 			<li>Don't be an ass.</li>
 			<li>Don't make me turn on logging.</li>
-			<li>Any questions or inquiries should be emailed to <a href="mailto:phantom@reticent.io">phantom@reticent.io</a>.</li>
+			<li>Any questions or inquiries should be emailed to <a href="mailto:{{ CONTACT }}">{{ CONTACT }}</a>.</li>
 		</ul>
 	</p>
 </article>

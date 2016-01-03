@@ -1,30 +1,17 @@
-import os, time, hashlib, shutil, datetime, random, subprocess
-from flask import request, abort, render_template, session, redirect, url_for, send_from_directory, flash, jsonify, escape
-from flask.ext.login import fresh_login_required, login_user, logout_user, current_user
+import datetime, hashlib, os, random, subprocess, time
+from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, session, url_for
+from flask.ext.login import current_user, fresh_login_required, login_user, logout_user
 from werkzeug import secure_filename
 
-from main import app, login_manager
-
 from config import config
-
-conf = globals()
-conf.update(config)
-
-from modules.helpers import write_log, get_path
+from main import app, bcrypt, login_manager
+from helpers import write_log
 from models.db import session_factory
-from modules.login import Login
-from modules.register import Register
-from models.user import requires_role, User
-from models.upload import Upload
 from models.invite import Invite
-
-'''
-Endpoints
-'''
-
-@login_manager.unauthorized_handler
-def not_found():
-	abort(404)
+from models.upload import Upload
+from models.user import requires_role, User
+from login import Login
+from register import Register
 
 @app.route('/grill', methods=['GET'])
 def grill():
@@ -34,10 +21,15 @@ def grill():
 
 	return send_from_directory(grill_dir, grills[rand])
 
+@login_manager.unauthorized_handler
+def not_found():
+	abort(404)
+
 @app.route('/logout', methods=['GET'])
 def logout():
 	logout_user()
 	flash('You have been logged out.')
+
 	return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -49,8 +41,7 @@ def login():
 
 	if request.method == 'POST':
 		user = login.validate()
-	 
-		# Role 0 is admin so don't check
+
 	 	if user:
 			flash('You are now logged in as ' + user.username + '.')
 
@@ -65,11 +56,8 @@ def login():
 @requires_role(0)
 def invite_new(name):
 	with session_factory() as sess:
-		try:
-			user = sess.query(User).filter(User.username == name).one()
+		if User.get_by_name(name):
 			return 'User already exists.'
-		except:
-			pass
 
 		try:
 			h = hashlib.md5(name + str(time.time())).hexdigest()
@@ -85,7 +73,7 @@ def invite(name, h):
 		return redirect(url_for('index'))
 
 	if not Invite.confirm_invite(name, h):
-		flash('Oops. Looks like somebody gave you a bad invite.', category='red')
+		flash(config.messages.BAD_INVITE, category='red')
 		return redirect(url_for('index'))
 
 	register = Register(request.form)
@@ -94,17 +82,11 @@ def invite(name, h):
 	if request.method == 'POST' and register.validate():
 		user = User(
 			username=name,
-			h=register.password.data,
+			h=bcrypt.generate_password_hash(register.password.data),
 			max_load=AUTH_PAYLOAD
-		)
+		).save()
 
-		user.save()
-
-		with session_factory() as sess:
-			sess.query(Invite).filter(
-				Invite.name == name,
-				Invite.h == h
-			).delete()
+		Invite.delete_invite(name, h)
 
 		flash('You are now registered.')
 
@@ -117,30 +99,51 @@ def build_url():
 	if 'filename' not in session or not session['filename']:
 		return redirect(url_for('index'))
 
-	filename = session['filename'].replace(app.config['UPLOAD_FOLDER'] + '/', '')
+	filename = session['filename']
 	session['filename'] = None
 	now = datetime.datetime.utcnow()
-	
-	ip = 'Logging Disabled'
+	ip = get_ip if config.LOGGING else 'Logging Disabled'
 
-	if LOGGING:
-		ip = get_ip()
-
-	Upload(h=filename, ip=ip, path=filename, last_update=now).save()
+	Upload(ip=ip, path=filename).save()
 
 	return render_template('build.html', title='Access URL', hash=filename)
 
-@app.route('/opps/<path:err>', methods=['GET'])
-def oops(err):
-	if not err:
-		abort(404)
+def process_file(file):
+	filename = secure_filename(file.filename)
 
-	if err not in MESSAGES:
-		abort(404)
+	if not filename:
+		filename = hashlib.md5(time.time()).hexdigest()
 
-	flash(MESSAGES[err], category='red')
+	path = os.path.join(config.UPLOAD_FOLDER, hashlib.sha1(filename + str(now)).hexdigest()[:10] + os.path.splitext(filename)[1])
+	
+	file.save(path)
 
-	return redirect(url_for('index'))
+	# Strip meta-data if we can.
+	exiftool = ''
+	command = config.script.EXIF_TOOL.format(**locals())
+	subprocess.call(command)
+
+	# Scan for virus
+	try:
+		command = config.script.CLAMDSCAN.format(**locals())
+
+		subprocess.check_call(command, shell=True)
+	except subprocess.CalledProcessError:
+		return jsonify({
+			'mode': 'message',
+			'message': config.messages.VIRUS,
+			'color': 'red'
+		})
+
+	rel_path = path.replace(config.UPLOAD_FOLDER, '')
+
+	subprocess.call(config.script.UPLOAD_AWS.format(**locals()), shell=True)
+
+	write_log('Uploaded ' + path)
+
+	session['filename'] = rel_path
+
+	return None
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -152,89 +155,46 @@ def upload():
 	if current_user.is_authenticated():
 		max_payload = current_user.max_payload()
 	else:
-		max_payload = MAX_PAYLOAD
+		max_payload = config.MAX_PAYLOAD
 
 	max_payload *= 1024 ** 2
 
 	if content_length > max_payload:
-		if 'ajax' in request.form:
-			return jsonify({
-				'mode': 'message',
-				'message': MESSAGES['too-big'],
-				'color': 'red'
-			})
-		else:
-			redirect(url_for('oops', err='too-big'))
+		return jsonify({
+			'mode': 'message',
+			'message': config.messages.TOO_BIG,
+			'color': 'red'
+		})
 
 	now = time.time()
 
 	if 'last' in session and now - session['last'] < UPLOAD_WAIT:
-		if 'ajax' in request.form:
-			return jsonify({
-				'mode': 'message',
-				'message': MESSAGES['slow-down'],
-				'color': 'red'
-			})
-
-		return redirect(url_for('oops', err='slow-down'))
+		return jsonify({
+			'mode': 'message',
+			'message': config.messages.SLOW_DOWN,
+			'color': 'red'
+		})
    
 	session['last'] = now
 
 	if 'upload' not in request.files:
-		if 'ajax' in request.form:
-			return jsonify({
-				'mode': 'message',
-				'message': MESSAGES['empty'],
-				'color': 'red'
-			})
-
-		return redirect(url_for('oops', err='empty'))
-
-	file = request.files['upload']
-
-	filename = secure_filename(file.filename)
-
-	if not filename:
-		filename = hashlib.md5(time.time()).hexdigest()
-
-	path = os.path.join('/tmp/', hashlib.sha1(filename + str(now)).hexdigest()[:10] + os.path.splitext(filename)[1])
-	
-	file.save(path)
-
-	# Strip meta-data if we can.
-	exiftool = '/usr/bin/exiftool'
-	command = '{exiftool} -q -all= {path}'.format(**locals())
-	subprocess.call(command, shell=True)
-
-	# Scan for virus
-	try:
-		clamdscan = '/usr/bin/clamdscan'
-		command = '{clamdscan} {path} | {clamdscan} --remove -'.format(**locals())
-
-		# true_path is sanitized already.
-		subprocess.check_call(command, shell=True)
-	except subprocess.CalledProcessError:
 		return jsonify({
 			'mode': 'message',
-			'message': MESSAGES['virus'],
+			'message': config.messages.EMPTY,
 			'color': 'red'
 		})
 
-	rel_path = path.replace('/tmp/', '')
+	file = request.files['upload']
 
-	print subprocess.check_output('/usr/local/bin/aws s3 cp {path} s3://neko.somoe.moe/{rel_path} && /bin/rm -r {path}'.format(**locals()), shell=True)
+	error = process_file(file)
 
-	write_log('Uploaded ' + path)
+	if error is not None:
+		return error
 
-	session['filename'] = rel_path
-
-	if 'ajax' in request.form:
-		return jsonify({
-			'mode': 'redirect',
-			'url': url_for('build_url')
-		})
-
-	return redirect(url_for('build_url'))
+	return jsonify({
+		'mode': 'redirect',
+		'url': url_for('build_url')
+	})
 
 @app.route('/guidelines', methods=['GET'])
 def guidelines():

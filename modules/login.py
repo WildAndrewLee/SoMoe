@@ -1,9 +1,8 @@
 from wtforms import Form, TextField, PasswordField, validators
+
+from main import app, bcrypt
 from models.user import User
 
-'''
-Form for logging in.
-'''
 class Login(Form):
 	_method = 'POST'
 	_action = '/login'
@@ -22,9 +21,9 @@ class Login(Form):
 		if not Form.validate(self):
 			return False
 
-		user = User.validate(self.name.data, self.password.data)
+		user = User.getByName(self.name.data)
 
-		if not user:
+		if not user or not bcrypt.check_password_hash(user.h, self.password.data):
 			# Quick hack to add a custom error post-form validation.
 			self.name.errors.append('Invalid username or password specified.')
 			return False
