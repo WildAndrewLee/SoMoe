@@ -3,8 +3,7 @@ from flask import abort
 from sqlalchemy import Column, Integer, String
 from flask.ext.login import current_user
 
-from main import bcrypt
-from models import Model, session_factory
+from models.db import Model, session_factory
 from config import config
 
 def requires_role(role):
@@ -29,10 +28,6 @@ class User(Model):
 	h = Column(String)
 	max_load = Column(Integer)
 	is_auth = None
-
-	def __init__(self, **kwargs):
-		kwargs['h'] = bcrypt.generate_password_hash(kwargs['h'])
-		super(User, self).__init__(**kwargs)
 
 	# Cache results of auth check because
 	# it's expensive to query the DB 5 million
@@ -75,23 +70,20 @@ class User(Model):
 		return unicode(self.id)
 
 	@staticmethod
-	def validate(username, password):
+	def get_by_name(username):
 		with session_factory() as sess:
 			try:
 				user = sess.query(User).filter(
-					User.username == username
+					User.username==username
 				).one()
 
-				if bcrypt.check_password_hash(user.h, password):
-					sess.expunge(user)
-					return user
-
-				return False
-			except:				
-				return False
+				sess.expunge(user)
+				return user
+			except:
+				return None
 
 	@staticmethod
-	def getById(userid):
+	def get_by_id(userid):
 		with session_factory() as sess:
 			try:
 				user = sess.query(User).filter(

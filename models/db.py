@@ -2,12 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from contextlib import contextmanager
-from secrets import db
 
-'''
-Database Connection via SQLAlchemy
-'''
-eng = 'mysql://{0}:{1}@reticent.io:3306/{2}'.format(db['username'], db['password'], db['name'])
+from config import config
+from modules.secrets import secrets
+
+eng = config.CONNECTION_STRING.format(secrets.db.username, secrets.db.password, secrets.db.name)
 engine = create_engine(
 	eng, pool_recycle=1800
 )

@@ -1,10 +1,7 @@
 import traceback
 from sqlalchemy import Column, Integer, String
-from models import Model, session_factory
+from models.db import Model, session_factory
 
-'''
-Invite Database Model
-'''
 class Invite(Model):
 	__tablename__ = 'invites'
 	id = Column(Integer, primary_key = True)
@@ -17,7 +14,6 @@ class Invite(Model):
 
 	@staticmethod
 	def confirm_invite(name, h):
-		print name, h
 		with session_factory() as sess:
 			try:
 				invite = sess.query(Invite).filter(
@@ -29,8 +25,15 @@ class Invite(Model):
 
 				return invite
 			except:
-				traceback.print_exc()
 				return None
+
+	@staticmethod
+	def delete_invite(name, h):
+		with session_factory() as sess:
+			invite = sess.query(Invite).filter(
+				Invite.name == name,
+				Invite.h == h
+			).delete()
 
 	def save(self):
 		with session_factory() as sess:

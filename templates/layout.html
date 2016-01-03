@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>{{ TITLE or title }}</title>
+		<title>{% block title %}{% endblock %}</title>
 		<script>
 		var MAX_PAYLOAD = {{ MAX_PAYLOAD }};
 		</script>
-		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Open+Sans" />
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Open+Sans" />
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}" />
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/') }}{{ STYLE }}" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/moe.css') }}" />
 		<script src="{{ url_for('static', filename='js/moe.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/firefly.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/neko.js') }}"></script>
@@ -22,7 +22,7 @@
 			<section id="top">
 				<div>
 					<header>
-						<h2><a href="{{ url_for('index') }}">{{ HEADER }}</a></h2>
+						<h2><a href="{{ url_for('index') }}">SoMoe</a></h2>
 					</header>
 					<nav>
 						<a href="https://github.com/WildAndrewLee/Phantom">Github</a>
