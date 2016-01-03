@@ -40,13 +40,13 @@ def login():
 	login = Login(request.form)
 
 	if request.method == 'POST' and login.validate():
-		user = User.get_by_name(self.name.data)
+		user = User.get_by_name(login.name.data)
 
-		if not user or not bcrypt.check_password_hash(user.h, self.password.data):
+		if not user or not bcrypt.check_password_hash(user.h, login.password.data):
 			flash('Invalid username or password specified.')
 			return render_template('login.html', title='Log In', form=login)
 		
-		
+
 		login_user(user)
 		flash('You are now logged in as ' + user.username + '.')
 
