@@ -114,20 +114,16 @@ def process_file(file):
 	if not filename:
 		filename = hashlib.md5(time.time()).hexdigest()
 
-	path = os.path.join(config.UPLOAD_FOLDER, hashlib.sha1(filename + str(now)).hexdigest()[:10] + os.path.splitext(filename)[1])
+	path = os.path.join(config.UPLOAD_FOLDER, hashlib.sha1(filename + str(session['last'])).hexdigest()[:10] + os.path.splitext(filename)[1])
 	
 	file.save(path)
 
 	# Strip meta-data if we can.
-	exiftool = ''
-	command = config.script.EXIF_TOOL.format(**locals())
-	subprocess.call(command)
+	subprocess.call(config.script.EXIF_TOOL.format(**locals()))
 
 	# Scan for virus
 	try:
-		command = config.script.CLAMDSCAN.format(**locals())
-
-		subprocess.check_call(command, shell=True)
+		subprocess.check_call(config.script.CLAMDSCAN.format(**locals()), shell=True)
 	except subprocess.CalledProcessError:
 		return jsonify({
 			'mode': 'message',
