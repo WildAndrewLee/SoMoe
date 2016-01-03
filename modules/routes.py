@@ -15,7 +15,7 @@ from register import Register
 
 @app.route('/grill', methods=['GET'])
 def grill():
-	grill_dir = os.path.join(os.path.dirname(__file__), 'static/grill')
+	grill_dir = os.path.join(os.path.dirname(__file__), '..', 'static/grill')
 	grills = os.listdir(grill_dir)
 	rand = int(random.random() * len(grills))
 
