@@ -39,15 +39,18 @@ def login():
 
 	login = Login(request.form)
 
-	if request.method == 'POST':
-		user = login.validate()
+	if request.method == 'POST' and login.validate():
+		user = User.get_by_name(self.name.data)
 
-	 	if user:
-			flash('You are now logged in as ' + user.username + '.')
+		if not user or not bcrypt.check_password_hash(user.h, self.password.data):
+			flash('Invalid username or password specified.')
+			return render_template('login.html', title='Log In', form=login)
+		
+		
+		login_user(user)
+		flash('You are now logged in as ' + user.username + '.')
 
-			login_user(user)
-
-			return redirect(url_for('index'))
+		return redirect(url_for('index'))
 
 	return render_template('login.html', title='Log In', form=login)
 
@@ -83,7 +86,7 @@ def invite(name, h):
 		user = User(
 			username=name,
 			h=bcrypt.generate_password_hash(register.password.data),
-			max_load=AUTH_PAYLOAD
+			max_load=config.AUTH_PAYLOAD
 		).save()
 
 		Invite.delete_invite(name, h)
