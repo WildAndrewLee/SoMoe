@@ -164,7 +164,7 @@ def upload():
 
 	now = time.time()
 
-	if 'last' in session and now - session['last'] < UPLOAD_WAIT:
+	if 'last' in session and now - session['last'] < config.UPLOAD_WAIT:
 		return jsonify({
 			'mode': 'message',
 			'message': config.messages.SLOW_DOWN,
