@@ -6,7 +6,6 @@ from flask.ext.login import LoginManager
 
 from config import config
 from modules.secrets import secrets
-import modules.setup
 
 sys.dont_write_bytecode = True
 
@@ -18,6 +17,7 @@ login_manager = LoginManager()
 
 bcrypt = Bcrypt(app)
 
+import modules.setup
 from modules.routes import *
 
 if __name__ == '__main__':
