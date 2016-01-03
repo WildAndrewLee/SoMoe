@@ -7,7 +7,6 @@
 	</p>
 </aside>
 <hr />
-{% if MIN_FREE_DISK < FREE_SPACE %}
 <form action="upload" method="POST" enctype="multipart/form-data">
 	<div>
 		<input id="picker" type="file" name="upload" required />
@@ -28,9 +27,4 @@
 	</div>
 </aside>
 <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
-{% else %}
-<p>
-	Uploads are currently disabled due to a lack of free diskspace. Email <a href="mailto:{{ CONTACT }}">{{ CONTACT }}</a> if you want to get this resolved faster.
-</p>
-{% endif %}
 {% endblock %}

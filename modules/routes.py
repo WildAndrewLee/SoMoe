@@ -10,13 +10,13 @@ from config import config
 conf = globals()
 conf.update(config)
 
-from helpers import write_log, get_path
-from models import session_factory
-from login import Login
-from register import Register
-from user import requires_role, User
-from upload import Upload
-from invite import Invite
+from modules.helpers import write_log, get_path
+from models.db import session_factory
+from modules.login import Login
+from modules.register import Register
+from models.user import requires_role, User
+from models.upload import Upload
+from models.invite import Invite
 
 '''
 Endpoints
@@ -112,46 +112,6 @@ def invite(name, h):
 
 	return render_template('register.html', title='You\'re Invited', form=register)
 
-
-
-# This endpoint is not made public due to all of the
-# fucking things that could possibly happen.
-#
-# It's a good idea to make your entire uploads
-# directory read and write only.
-@app.route('/serve/<h>', methods=['GET'])
-def serve(h):
-	path = get_path(h)
-	return send_from_directory(app.config['UPLOAD_FOLDER'], path)
-
-@app.route('/fetch/<h>', methods=['GET'])
-def fetch(h):
-	path = get_path(h)
-	return send_from_directory(app.config['UPLOAD_FOLDER'], path, as_attachment=True)
-
-@app.route('/delete/<h>', methods=['GET'])
-@fresh_login_required
-@requires_role(0)
-def delete_url(h):
-	with session_factory() as sess:
-		try:
-			path = sess.query(Upload).filter(Upload.h == h).one()
-		except:
-			abort(404)
-
-		sys_path = os.path.join(app.config['UPLOAD_FOLDER'], path.path)
-
-		shutil.rmtree(os.path.dirname(sys_path))
-		path.delete()
-
-		msg = 'Deleted hash <{0}>.'.format(h)
-		msg = escape(msg)
-
-		flash(msg)
-		write_log('Removed file with hash ' + h)
-
-		return redirect(url_for('index'))
-
 @app.route('/build-url', methods=['GET'])
 def build_url():	
 	if 'filename' not in session or not session['filename']:
@@ -166,12 +126,9 @@ def build_url():
 	if LOGGING:
 		ip = get_ip()
 
-	h = hashlib.md5(filename).hexdigest()
-	h += hashlib.md5(str(now)).hexdigest()
+	Upload(h=filename, ip=ip, path=filename, last_update=now).save()
 
-	Upload(h=h, ip=ip, path=filename, last_update=now).save()
-
-	return render_template('build.html', title='Access URL', hash=h)
+	return render_template('build.html', title='Access URL', hash=filename)
 
 @app.route('/opps/<path:err>', methods=['GET'])
 def oops(err):
@@ -184,8 +141,6 @@ def oops(err):
 	flash(MESSAGES[err], category='red')
 
 	return redirect(url_for('index'))
-
-	#return render_template('oops.html', title=MESSAGES[err], message=MESSAGES[err])
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -242,18 +197,7 @@ def upload():
 	if not filename:
 		filename = hashlib.md5(time.time()).hexdigest()
 
-	hashed_name = hashlib.md5(filename).hexdigest()
-	hashed_time = hashlib.md5(str(now)).hexdigest()
-
-	directory = os.path.join(app.config['UPLOAD_FOLDER'], hashed_time, hashed_name)
-
-	# Highly unlikely that we need to check this due
-	# to the nature of MD5 hashing but oh well.
-
-	if not os.path.exists(directory):
-		os.makedirs(directory)
-
-	path = os.path.join(directory, filename)
+	path = os.path.join('/tmp/', hashlib.sha1(filename + str(now)).hexdigest()[:10] + os.path.splitext(filename)[1])
 	
 	file.save(path)
 
@@ -276,9 +220,13 @@ def upload():
 			'color': 'red'
 		})
 
+	rel_path = path.replace('/tmp/', '')
+
+	print subprocess.check_output('/usr/local/bin/aws s3 cp {path} s3://neko.somoe.moe/{rel_path} && /bin/rm -r {path}'.format(**locals()), shell=True)
+
 	write_log('Uploaded ' + path)
 
-	session['filename'] = path
+	session['filename'] = rel_path
 
 	if 'ajax' in request.form:
 		return jsonify({

@@ -1,5 +1,5 @@
 config = {
-	'UPLOAD_FOLDER': '/var/phantom/uploads',
+	'UPLOAD_FOLDER': '/tmp/',
 	'MAX_PAYLOAD': 20,
 	'AUTH_PAYLOAD': 35,
 	'UPLOAD_WAIT': 10,

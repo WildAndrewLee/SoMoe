@@ -1,11 +1,14 @@
 from functools import wraps
 from flask import abort
 from sqlalchemy import Column, Integer, String
+from flask.ext.bcrypt import Bcrypt
 from flask.ext.login import current_user
 
-from main import bcrypt
-from models import Model, session_factory
+from main import app
+from models.db import Model, session_factory
 from config import config
+
+bcrypt = Bcrypt(app)
 
 def requires_role(role):
 	def wrapper(route):

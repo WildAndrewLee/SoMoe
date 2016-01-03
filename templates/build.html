@@ -5,7 +5,8 @@
 </p>
 <form>
 	<div>
-		<input readonly type="text" value="{{ url_for('fetch', h=hash, _external=True) }}" />
+		<input readonly type="text" value="{{ 'http://neko.somoe.moe/' + hash }}" />
+		<!--<input readonly type="text" value="{{ url_for('fetch', h=hash, _external=True) }}" />-->
 	</div>
 </form>
 <style>

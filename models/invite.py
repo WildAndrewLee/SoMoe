@@ -1,6 +1,6 @@
 import traceback
 from sqlalchemy import Column, Integer, String
-from models import Model, session_factory
+from models.db import Model, session_factory
 
 '''
 Invite Database Model

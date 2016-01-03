@@ -3,8 +3,8 @@ from flask import request, session, abort
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from config import config
-from models import session_factory
-from upload import Upload
+from models.db import session_factory
+from models.upload import Upload
 
 '''
 Helper Functions

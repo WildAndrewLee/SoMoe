@@ -7,12 +7,8 @@ conf = globals()
 conf.update(config)
 
 from main import app, login_manager
-
-from disk_usage import disk_usage
-from helpers import is_logged_in, write_log
 from secrets import secrets
-
-from user import User
+from models.user import User
 
 login_manager.refresh_view = 'login'
 
@@ -29,13 +25,7 @@ Runtime Config
 app.debug = DEBUG
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-#app.config['MAX_CONTENT_LENGTH'] = MAX_PAYLOAD * 1024 * 1024
-app.secret_key = secrets['key']
-
-# Commented out to allow somoe.moe and phantom.reticent.io to
-# point to Phantom.
-
-# app.config['SERVER_NAME'] = PRODUCTION_URL if not DEBUG else DEV_URL + ':' + str(DEV_PORT)
+app.secret_key = secrets.cookie_key
 
 '''
 Inject Template variables
@@ -43,12 +33,10 @@ Inject Template variables
 
 @app.context_processor
 def variables():
-	total, used, free = disk_usage('/')
-
 	FREE_SPACE = free / (1024 ** 3)
 
 	host = request.url_root\
-				.replace('http://', '')\
+				.replace('http://', '').replace('https://', '')\
 				.replace('www.', '')\
 				.split('/')[0]
 
@@ -72,8 +60,5 @@ def variables():
 		'HEADER': HEADER,
 		'MAX_PAYLOAD': max_payload,
 		'UPLOAD_WAIT': UPLOAD_WAIT,
-		'CONTACT': 'phantom@reticent.io',
-		'MIN_FREE_DISK': MIN_FREE_DISK,
-		'FREE_SPACE': FREE_SPACE,
-		'__LOG_ACCESS': write_log('Accessed Page')
+		'CONTACT': 'phantom@reticent.io'
 	}

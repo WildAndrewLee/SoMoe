@@ -1,5 +1,5 @@
 from wtforms import Form, TextField, PasswordField, validators
-from user import User
+from models.user import User
 
 '''
 Form for logging in.

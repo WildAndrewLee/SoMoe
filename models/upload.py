@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from models import Model, session_factory
+from models.db import Model, session_factory
 
 '''
 Uploads Database Model
