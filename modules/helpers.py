@@ -1,4 +1,5 @@
 import time
+from fcntl import lockf, LOCK_EX, LOCK_UN
 from flask import request
 
 from config import config
@@ -19,6 +20,8 @@ def write_log(message):
 			if is_logged_in():
 				name = str(session['logged_in']) + ' '
 
+			lockf(f, LOCK_EX)
 			log.write(name + ip + ' - ' + now + ' ' + message + '\n')
+			lockf(f, LOCK_UN)
 
 	return None
